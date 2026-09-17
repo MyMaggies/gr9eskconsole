@@ -307,7 +307,7 @@
     display:block;
   }
   .posterrow{display:flex; gap:10px; margin-bottom:16px;}
-  .posterrow img{width:33%; border-radius:6px; border:1px solid var(--line);}
+  .posterrow img{width:33%; height:150px; object-fit:cover; object-position:top; border-radius:6px; border:1px solid var(--line);}
 
   .checklist{list-style:none; padding:0; margin:0 0 18px 0;}
   .checklist li{
@@ -482,6 +482,7 @@ const DEFAULT_STATE = {
   },
   bonus:{ order:shuffled(RAW_Q.bonus.length), qi:0, pts:0, done:false, taken:false },
   poster:{ order:shuffled(RAW_Q.poster.length), qi:0, done:false },
+  tabSwitches:{ cp1:0, cp2:0, cp3:0, poster:0 },
   answered:false,
   lastCorrect:null
 };
@@ -517,6 +518,16 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
     state = clone(DEFAULT_STATE);
     saveState();
     render();
+  }
+});
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.hidden){
+    const s = stagePart();
+    if(state.tabSwitches && Object.prototype.hasOwnProperty.call(state.tabSwitches, s)){
+      state.tabSwitches[s]++;
+      saveState();
+    }
   }
 });
 
@@ -665,6 +676,7 @@ function cpRestartedScreen(cp){
 
 function cpLockedScreen(cp){
   const meta = CP_META[cp];
+  const switches = (state.tabSwitches && state.tabSwitches[cp]) || 0;
   return `
   <div class="card">
     <div class="celebrate">
@@ -674,6 +686,7 @@ function cpLockedScreen(cp){
     </div>
     <p>Well done \u2014 now put your device down and complete <strong>${esc(meta.handout)}</strong> on paper. Answer every question, then raise your hand.</p>
     <p class="kicker">Your teacher will check your handout and type the unlock code below.</p>
+    <span class="badge-note" style="display:block; text-align:center;">Left this page ${switches} time${switches===1?'':'s'} during this section</span>
     <span class="lockicon" style="text-align:center; display:block;">\u{1F512}</span>
     <input type="password" id="codeInput" placeholder="Unlock code" inputmode="numeric" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div id="codeErr" class="err" style="display:none;">That code isn't right \u2014 ask your teacher to try again.</div>
@@ -746,6 +759,7 @@ function posterQuizScreen(){
 }
 
 function posterLockedScreen(){
+  const switches = (state.tabSwitches && state.tabSwitches.poster) || 0;
   return `
   <div class="card">
     <div class="celebrate">
@@ -754,6 +768,7 @@ function posterLockedScreen(){
       <h2>Nice eye for detail</h2>
     </div>
     <p>Raise your hand \u2014 your teacher will check in with you, then type the code below.</p>
+    <span class="badge-note" style="display:block; text-align:center;">Left this page ${switches} time${switches===1?'':'s'} during this section</span>
     <span class="lockicon" style="text-align:center; display:block;">\u{1F512}</span>
     <input type="password" id="codeInput" placeholder="Unlock code" inputmode="numeric" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div id="codeErr" class="err" style="display:none;">That code isn't right \u2014 ask your teacher to try again.</div>
@@ -763,6 +778,8 @@ function posterLockedScreen(){
 
 function waitingScreen(){
   const restarts = state.cps.cp1.restarts + state.cps.cp2.restarts + state.cps.cp3.restarts;
+  const ts = state.tabSwitches || {cp1:0,cp2:0,cp3:0,poster:0};
+  const totalSwitches = ts.cp1 + ts.cp2 + ts.cp3 + ts.poster;
   return `
   <div class="card">
     <div class="eyebrow">Nice work, ${esc(state.name || "recruit")}</div>
@@ -772,6 +789,7 @@ function waitingScreen(){
       <div class="box"><div class="num">3 / 3</div><div class="lbl">Checkpoints cleared</div></div>
       <div class="box"><div class="num">${state.bonus.pts}</div><div class="lbl">Bonus points</div></div>
       <div class="box"><div class="num">${restarts}</div><div class="lbl">Section restarts</div></div>
+      <div class="box" style="grid-column:1 / -1;"><div class="num">${totalSwitches}</div><div class="lbl">Times left this page (CP1: ${ts.cp1} \u00b7 CP2: ${ts.cp2} \u00b7 CP3: ${ts.cp3} \u00b7 Poster: ${ts.poster})</div></div>
     </div>
     <p class="kicker">While you wait for your teacher, have a think about this \u2014 nothing to write down yet:</p>
     <div class="reflect">How would you persuade a young man to join the army? What techniques would you use, and why?</div>
