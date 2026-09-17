@@ -22,8 +22,10 @@
     --focus: #2B6CB0;
     --radius: 10px;
     --shadow: 0 6px 20px rgba(43,36,20,0.12);
-    --correct-bg: rgba(184,134,59,0.20);
-    --wrong-bg: rgba(166,61,43,0.16);
+    --correct-bg: rgba(43,153,79,0.20);
+    --wrong-bg: rgba(191,54,37,0.18);
+    --right: #2B994F;
+    --wrongc: #BF3625;
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark){
@@ -40,8 +42,10 @@
       --line: rgba(242,239,230,0.12);
       --focus:#7FB2E5;
       --shadow: 0 10px 28px rgba(0,0,0,0.45);
-      --correct-bg: rgba(227,182,87,0.22);
-      --wrong-bg: rgba(224,96,74,0.20);
+      --correct-bg: rgba(74,222,128,0.22);
+      --wrong-bg: rgba(224,96,74,0.22);
+      --right: #4ADE80;
+      --wrongc: #E0604A;
     }
   }
   :root[data-theme="dark"]{
@@ -57,8 +61,10 @@
     --line: rgba(242,239,230,0.12);
     --focus:#7FB2E5;
     --shadow: 0 10px 28px rgba(0,0,0,0.45);
-    --correct-bg: rgba(227,182,87,0.22);
-    --wrong-bg: rgba(224,96,74,0.20);
+    --correct-bg: rgba(74,222,128,0.22);
+    --wrong-bg: rgba(224,96,74,0.22);
+    --right: #4ADE80;
+    --wrongc: #E0604A;
   }
 
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -223,6 +229,8 @@
     font-size:1rem;
     color:var(--ink);
     cursor:pointer;
+    position:relative;
+    overflow:visible;
     transition:border-color .15s ease, background .15s ease, transform .1s ease;
   }
   .opt:hover:not(:disabled){border-color:var(--gold);}
@@ -231,15 +239,31 @@
   .opt:disabled{cursor:default;}
   .opt.correct{
     background:var(--correct-bg);
-    border-color:var(--gold);
-    animation:popCorrect .35s ease;
+    border-color:var(--right);
+    animation:celebrateOpt .6s ease;
   }
   .opt.wrong{
     background:var(--wrong-bg);
-    border-color:var(--danger);
+    border-color:var(--wrongc);
     animation:shake .35s ease;
   }
-  @keyframes popCorrect{0%{transform:scale(1);}45%{transform:scale(1.02);}100%{transform:scale(1);}}
+  @keyframes celebrateOpt{
+    0%{transform:scale(1);}
+    30%{transform:scale(1.035); box-shadow:0 0 0 7px var(--correct-bg);}
+    65%{transform:scale(0.99);}
+    100%{transform:scale(1); box-shadow:0 0 0 0 transparent;}
+  }
+  .sparkle{
+    position:absolute; top:50%; left:50%;
+    font-size:1.15rem;
+    pointer-events:none;
+    z-index:5;
+    animation:sparkleUp .85s ease-out forwards;
+  }
+  @keyframes sparkleUp{
+    0%{opacity:1; transform:translate(-50%,-50%) scale(0.3) rotate(0deg);}
+    100%{opacity:0; transform:translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(1.15) rotate(var(--sr));}
+  }
   @keyframes shake{
     0%,100%{transform:translateX(0);}
     20%{transform:translateX(-5px);}
@@ -255,8 +279,8 @@
     font-size:0.98rem;
     animation:fadeIn .25s ease;
   }
-  .feedback.good{background:var(--correct-bg); border:1px solid var(--gold);}
-  .feedback.bad{background:var(--wrong-bg); border:1px solid var(--danger);}
+  .feedback.good{background:var(--correct-bg); border:1px solid var(--right);}
+  .feedback.bad{background:var(--wrong-bg); border:1px solid var(--wrongc);}
   @keyframes fadeIn{from{opacity:0; transform:translateY(-4px);}to{opacity:1; transform:translateY(0);}}
 
   .lockicon{font-size:2.4rem; margin-bottom:8px; display:block;}
@@ -292,12 +316,27 @@
     100%{opacity:0; transform:translate(var(--dx), 140px) rotate(var(--rot));}
   }
 
-  .restarted{
+  .deathcard{
+    background:#0A0A0A;
+    border:1px solid #000;
     text-align:center;
-    padding:22px 0;
+    padding:44px 20px 36px;
     animation:fadeIn .3s ease;
   }
-  .restarted .lockicon{filter:grayscale(0.3);}
+  .deathcard .skull{
+    font-size:4.4rem;
+    display:block;
+    margin-bottom:10px;
+    filter:drop-shadow(0 0 16px rgba(255,255,255,0.18));
+    animation:deathPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes deathPulse{
+    0%,100%{transform:scale(1); opacity:0.9;}
+    50%{transform:scale(1.07); opacity:1;}
+  }
+  .deathcard h2{color:#F0F0F0; letter-spacing:0.01em;}
+  .deathcard p{color:#9A9A9A;}
+  .deathcard .btn{background:#E8E8E8; color:#0A0A0A;}
 
   .posterimg{
     width:100%;
@@ -307,7 +346,7 @@
     display:block;
   }
   .posterrow{display:flex; gap:10px; margin-bottom:16px;}
-  .posterrow img{width:33%; height:150px; object-fit:cover; object-position:top; border-radius:6px; border:1px solid var(--line);}
+  .posterrow img{width:33%; height:200px; object-fit:contain; background:var(--panel-2); border-radius:6px; border:1px solid var(--line);}
 
   .checklist{list-style:none; padding:0; margin:0 0 18px 0;}
   .checklist li{
@@ -376,7 +415,22 @@
     margin-bottom:14px;
   }
 
-  .err{color:var(--danger); font-size:0.9rem; margin:-8px 0 12px;}
+  .err{color:var(--wrongc); font-size:0.9rem; margin:-8px 0 12px;}
+
+  .teacherOnly{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+    text-align:center;
+  }
+  .teacherOnly button{
+    background:none; border:none;
+    color:var(--ink-soft);
+    font-size:0.82rem;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:'Work Sans', sans-serif;
+  }
 
   @media (max-width:420px){
     .card{padding:22px 16px;}
@@ -406,9 +460,19 @@ const STAGES = ["cp1","cp2","cp3","poster","waiting","design"];
 
 const CP_META = {
   cp1: { title:"Audience, Purpose, Form & Register", note:"A quick recap of what you already covered in class.", handout:"Handout A" },
-  cp2: { title:"Academic Integrity", note:"Checking you remember why honesty in your work matters.", handout:"Handout B" },
-  cp3: { title:"Persuasive Techniques", note:"New ground — make sure you've read the \u2018Writing to Persuade\u2019 BBC Bitesize handout before you start.", handout:"Handout C" }
+  cp2: { title:"Academic Integrity", note:"Some of these terms are new \u2014 read the definitions below carefully before you start.", handout:"Handout B" },
+  cp3: { title:"Persuasive Techniques", note:"New ground \u2014 read the \u2018Writing to Persuade\u2019 BBC Bitesize page below before you start.", handout:"Handout C" }
 };
+
+const CP2_DEFINITIONS = [
+  ["Plagiarism", "Presenting someone else's work or ideas as your own."],
+  ["Cheating", "Getting unauthorised help during a test, quiz or exam."],
+  ["Collusion", "Working with someone else on a task you were told to complete independently."],
+  ["Contract cheating", "Paying, or getting someone else, to complete your work for you."],
+  ["Patch-writing", "Stitching together copied text from different sources with just a few words changed, without proper citation."],
+  ["Lifting", "Copying someone's exact words into your work with no quotation marks \u2014 even if you say where it's from."],
+  ["Forgery", "Faking someone else's signature or approval on a document, e.g. a parent's signature on a form."]
+];
 
 const POSTER_IMG = {
   1: "1.png",
@@ -422,49 +486,53 @@ function mc(q, options, answer, explain){ return {q, options, answer, explain}; 
 
 const RAW_Q = {
   cp1: [
-    mc("Which sentence is written in a formal register?", ["I can't wait for the trip!","I am writing to express my interest in the position.","That's so cool, ngl.","Can't make it, sorry!"], 1, "Formal writing avoids contractions and slang \u2014 this sentence does both."),
-    tf("Formal writing usually avoids contractions such as \u2018don't\u2019 and \u2018can't\u2019.", true, "Correct \u2014 formal writing spells words out in full."),
-    mc("A recipe explaining how to bake a cake has which purpose?", ["To entertain","To instruct","To persuade","To analyse"], 1, "Step-by-step directions = instructing."),
-    mc("An advert convincing you to buy trainers has which purpose?", ["To inform","To instruct","To persuade","To analyse"], 2, "Adverts want you to act \u2014 that's persuading."),
-    mc("A piece that opens \u2018Dear Editor,\u2019 and argues a viewpoint is which form?", ["Diary entry","Letter","Narrative","Instructions"], 1, "\u2018Dear...\u2019 signals a letter, even printed in a paper."),
-    mc("Text with a headline, byline and columns reporting recent events is which form?", ["Report","Article","Speech","Interview"], 1, "Headline + byline + columns = a newspaper or magazine article."),
-    mc("Which is the most formal way to say \u2018a lot of people came\u2019?", ["Loads of people showed up","Numerous people attended","Tons of people came","Loads turned up"], 1, "\u2018Numerous\u2019 and \u2018attended\u2019 are precise, formal vocabulary."),
+    mc("Which sentence is written in a formal register?", ["Honestly, the whole experience was completely underwhelming, ngl.","The overall experience proved to be considerably underwhelming.","I can't believe how underwhelming that whole thing was, tbh.","That whole experience was so underwhelming, I literally can't even."], 1, "Same idea, similar length \u2014 but only this one drops the contractions and slang. Register is about those choices, not big words or sentence length."),
+    tf("Formal writing often uses contractions such as \u2018don't\u2019 and \u2018isn't\u2019 to sound more natural.", false, "The opposite \u2014 formal writing spells words out in full."),
+    mc("A leaflet explaining how to assemble a bookshelf has which purpose?", ["To persuade","To entertain","To instruct","To analyse"], 2, "Step-by-step directions = instructing."),
+    mc("An advert convincing you to buy trainers has which purpose?", ["To inform","To instruct","To analyse","To persuade"], 3, "Adverts want you to act \u2014 that's persuading."),
+    mc("A piece of writing that opens \u2018Dear Sir/Madam,\u2019 and argues a viewpoint is which form?", ["Diary entry","Formal essay","Formal letter"], 2, "\u2018Dear Sir/Madam\u2019 is the classic opening of a formal letter."),
+    mc("A personal, day-by-day account of what happened to you, written just for yourself, is which form?", ["Formal letter","Diary entry","Formal essay"], 1, "Private, personal, day-by-day \u2014 that's a diary entry."),
+    mc("A structured piece with an introduction, evidence-based paragraphs and a conclusion, written to argue a formal point, is which form?", ["Diary entry","Formal letter","Formal essay"], 2, "Introduction + evidence + conclusion is the shape of a formal essay."),
+    mc("Which is the most formal alternative to \u2018get\u2019?", ["Grab","Obtain","Snag","Pick up"], 1, "\u2018Obtain\u2019 is precise, formal vocabulary."),
     tf("Register means matching your vocabulary and tone to your audience and purpose.", true, "Exactly \u2014 that's the definition of register.")
   ],
   cp2: [
-    mc("Presenting someone else's work or ideas as your own is called:", ["Collusion","Plagiarism","Contract cheating","Patch-writing"], 1, "That's the definition of plagiarism."),
-    mc("A student pays a website to write their homework. This is:", ["Plagiarism","Collusion","Contract cheating","Fair use"], 2, "Paying or using a service to produce your work is contract cheating."),
-    mc("Two students told to work alone submit identical answers because they worked together. This is:", ["Plagiarism","Collusion","Forgery","Patch-writing"], 1, "Working together when you should work alone is collusion."),
-    tf("Changing a few words in a copied paragraph without citing the source still counts as plagiarism.", true, "Yes \u2014 this is sometimes called patch-writing, and it's still plagiarism."),
-    mc("Which of these is NOT one of the six core values of academic integrity?", ["Honesty","Popularity","Fairness","Responsibility"], 1, "The six values are honesty, trust, fairness, respect, responsibility and courage."),
-    tf("Using hidden notes during a test is an example of cheating.", true, "Correct \u2014 unauthorised help during an assessment is cheating."),
-    mc("\u2018Patch-writing\u2019 means:", ["Copying word-for-word with quotation marks and a citation","Stitching together copied bits from different sources with a few words changed","Writing entirely original ideas","Referencing a source correctly"], 1, "Patch-writing stitches together lightly-changed copied text \u2014 still plagiarism."),
-    mc("If a school suspects plagiarism, what commonly happens first?", ["Immediate expulsion","The work is checked using plagiarism-detection software","Nothing happens","Extra credit is given"], 1, "Suspected work is usually checked with detection software first.")
+    mc("Presenting someone else's work or ideas as your own is called:", ["Collusion","Contract cheating","Plagiarism","Patch-writing"], 2, "That's the definition of plagiarism."),
+    mc("Getting someone else to complete a test or exam for you is an example of:", ["Cheating","Collusion","Forgery","Patch-writing"], 0, "Unauthorised help during an assessment is cheating."),
+    mc("Working with a partner on a task you were told to complete independently is:", ["Contract cheating","Plagiarism","Forgery","Collusion"], 3, "Working together when you should work alone is collusion."),
+    mc("Paying a website to write your assignment for you is:", ["Patch-writing","Collusion","Contract cheating","Lifting"], 2, "Paying or using a service to produce your work is contract cheating."),
+    mc("Copying a sentence exactly from a website into your essay, with no quotation marks \u2014 even though you name the website in your bibliography \u2014 is called:", ["Proper referencing","Lifting","Collusion","Contract cheating"], 1, "Naming the source isn't enough \u2014 exact wording needs quotation marks, or it's lifting."),
+    mc("Copying a few sentences from several different sources and changing a few words in each before combining them into one paragraph is:", ["Forgery","Cheating","Contract cheating","Patch-writing"], 3, "Stitching together lightly-changed copied text from multiple sources is patch-writing."),
+    mc("Signing a parent's or teacher's name on a form without their knowledge is:", ["Forgery","Lifting","Collusion","Patch-writing"], 0, "Faking someone's signature or approval is forgery."),
+    tf("Patch-writing still counts as plagiarism, even though the wording has been changed.", true, "Yes \u2014 changing a few words doesn't make copied material your own."),
+    tf("If you name your source, you don't need quotation marks around text you've copied word-for-word.", false, "You still need quotation marks around exact wording \u2014 naming the source alone isn't enough."),
+    mc("If a piece of work is suspected of plagiarism, what commonly happens?", ["The work is ignored","Nothing \u2014 it's too hard to check","The student is expelled immediately","It's reviewed for plagiarism by multiple human and/or software checkers"], 3, "Suspected work is typically reviewed by people and software, not judged on suspicion alone."),
+    mc("Which of these is NOT one of the six core values of academic integrity?", ["Responsibility","Popularity","Fairness","Honesty"], 1, "The six values are honesty, trust, fairness, respect, responsibility and courage \u2014 popularity isn't one.")
   ],
   cp3: [
-    mc("\u2018Are you really going to let this happen?\u2019 is an example of:", ["A rhetorical question","Repetition","Statistics","Exaggeration"], 0, "It's a question not meant to be answered \u2014 it just makes the reader think."),
-    mc("\u2018We all deserve better\u2019 uses:", ["Statistics","Pronouns","Anecdote","Undermining the opposition"], 1, "\u2018We\u2019 includes the reader in the group \u2014 the pronouns device."),
-    mc("A slogan repeated throughout an advert, like \u2018this is not just ordinary food\u2026\u2019, is:", ["Repetition","Direct address","Exaggeration","Statistics"], 0, "Repeating a phrase so it sticks in your mind is repetition."),
-    mc("\u20189 out of 10 people preferred this brand\u2019 is an example of:", ["Anecdote","Exaggeration","Statistics","Pronouns"], 2, "Numbers used as evidence are statistics."),
-    mc("A charity advert telling one child's personal story to make you care is using:", ["Anecdote","Direct address","Undermining the opposition","Rhetorical question"], 0, "A short story used to make a point feel real is an anecdote."),
+    mc("\u2018Are you really going to let this happen?\u2019 is an example of:", ["Repetition","A rhetorical question","Statistics","Exaggeration"], 1, "It's a question not meant to be answered \u2014 it just makes the reader think."),
+    mc("\u2018We all deserve better\u2019 uses:", ["Statistics","Anecdote","Pronouns","Undermining the opposition"], 2, "\u2018We\u2019 includes the reader in the group \u2014 the pronouns device."),
+    mc("A slogan repeated throughout an advert, like \u2018this is not just ordinary food\u2026\u2019, is:", ["Direct address","Repetition","Exaggeration","Statistics"], 1, "Repeating a phrase so it sticks in your mind is repetition."),
+    mc("\u20189 out of 10 people preferred this brand\u2019 is an example of:", ["Anecdote","Exaggeration","Pronouns","Statistics"], 3, "Numbers used as evidence are statistics."),
+    mc("A charity advert telling one child's personal story to make you care is using:", ["Direct address","Undermining the opposition","Anecdote","Rhetorical question"], 2, "A short story used to make a point feel real is an anecdote."),
     mc("\u2018YOU need this in your life\u2019, spoken straight at the reader, is:", ["Repetition","Direct address","Statistics","Exaggeration"], 1, "Speaking straight at the reader using \u2018you\u2019 is direct address."),
-    mc("\u2018This is the greatest invention in the history of the world\u2019 is:", ["Exaggeration","Statistics","Anecdote","Pronouns"], 0, "Overstating something for effect is exaggeration."),
-    mc("Criticising a rival product to make your own look better is:", ["Undermining the opposition","Direct address","Anecdote","Repetition"], 0, "Putting down the other side is undermining the opposition."),
-    mc("Which appeal is about earning the reader's trust through shared values?", ["Ethos","Pathos","Logos","Anecdote"], 0, "Ethos is about trust and shared values."),
+    mc("\u2018This is the greatest invention in the history of the world\u2019 is:", ["Statistics","Anecdote","Exaggeration","Pronouns"], 2, "Overstating something for effect is exaggeration."),
+    mc("Criticising a rival product to make your own look better is:", ["Direct address","Anecdote","Repetition","Undermining the opposition"], 3, "Putting down the other side is undermining the opposition."),
+    tf("Ethos means earning the reader's trust through shared values.", true, "Correct \u2014 Ethos is about trust and shared values."),
     tf("Logos means appealing to the reader's emotions.", false, "That's Pathos. Logos is about logic and evidence.")
   ],
   bonus: [
-    mc("Repeating the same words at the START of successive sentences is called:", ["Anaphora","Epistrophe","Hypophora"], 0, "Anaphora repeats words at the start of sentences or clauses."),
-    mc("Repeating the same words at the END of successive sentences is called:", ["Anaphora","Epistrophe","Hypophora"], 1, "Epistrophe repeats words at the end of sentences or clauses."),
-    mc("Asking a rhetorical question then immediately answering it yourself is called:", ["Anaphora","Epistrophe","Hypophora"], 2, "That's hypophora \u2014 like \u2018Can we fix it? Yes we can.\u2019")
+    mc("Repeating the same words at the START of successive sentences is called:", ["Hypophora","Anaphora","Epistrophe"], 1, "Anaphora repeats words at the start of sentences or clauses."),
+    mc("Repeating the same words at the END of successive sentences is called:", ["Anaphora","Hypophora","Epistrophe"], 2, "Epistrophe repeats words at the end of sentences or clauses."),
+    mc("Asking a rhetorical question then immediately answering it yourself is called:", ["Epistrophe","Anaphora","Hypophora"], 2, "That's hypophora \u2014 like \u2018Can we fix it? Yes we can.\u2019")
   ],
   poster: [
-    mc("In \u2018I Want You for U.S. Army\u2019, Uncle Sam points and the text says \u2018YOU\u2019. What technique is this?", ["Direct address","Statistics","Anecdote","Undermining the opposition"], 0, "Speaking straight at the reader is direct address.", 1),
-    mc("\u2018Will you fill it?\u2019 in the second poster is an example of:", ["Rhetorical question","Statistics","Exaggeration","Anecdote"], 0, "It's a question aimed at the reader, not meant to be answered aloud.", 2),
-    mc("The same soldier figure is drawn again and again in a long line. Which written technique does this echo?", ["Repetition","Anecdote","Statistics","Pronouns"], 0, "Repeating the same image has the same effect as repeating words.", 2),
-    mc("\u2018What in the end will settle this war?\u2019 in the third poster is a:", ["Rhetorical question","Statistic","Anecdote","Exaggeration"], 0, "It's a question posed to make the reader think, then the poster answers it.", 3),
-    mc("The poster asks a question, then instantly answers it: \u2018Trained Men\u2019. This mirrors which bonus-round technique?", ["Anaphora","Epistrophe","Hypophora"], 2, "Answering your own rhetorical question is hypophora.", 3),
-    mc("Which technique do all three posters share?", ["Direct address","Statistics","Anecdote","Undermining the opposition"], 0, "Every poster speaks straight at \u2018YOU\u2019 \u2014 direct address is the common thread.", 0)
+    mc("In this poster, Uncle Sam points directly at the reader and the text says \u2018YOU\u2019. What technique is this?", ["Direct address","Statistics","Anecdote","Undermining the opposition"], 0, "Speaking straight at the reader is direct address.", 1),
+    mc("\u2018Will you fill it?\u2019 in this poster is:", ["A statistic phrased as a question","A rhetorical question, not expecting a real answer","An anecdote written as a question","A direct question that expects an answer"], 1, "It's phrased as a question, but nobody's meant to actually answer it aloud \u2014 it just makes the reader reflect.", 2),
+    mc("In this poster, the same soldier figure is drawn again and again in a long line. Which written technique does this echo visually?", ["Repetition","Anecdote","Statistics","Pronouns"], 0, "Repeating the same image has the same effect as repeating words \u2014 it reinforces the message.", 2),
+    mc("\u2018What in the end will settle this war?\u2019 in this poster is:", ["A direct question that expects an answer","A statistic presented as a question","A rhetorical question, not expecting a real answer","An anecdote presented as a question"], 2, "It's posed to make the reader think \u2014 then the poster answers it itself.", 3),
+    mc("The phrase \u2018YOUR DUTY\u2019 in this poster is designed to make the reader feel a strong sense of obligation and guilt if they don't act. This is closest to:", ["Statistics","Emotive language","Anecdote","Undermining the opposition"], 1, "Language chosen specifically to trigger a feeling \u2014 here, guilt and obligation \u2014 is emotive language.", 3),
+    mc("Which technique do all three posters share?", ["Statistics","Anecdote","Direct address","Undermining the opposition"], 2, "Every poster speaks straight at \u2018YOU\u2019 \u2014 direct address is the common thread.", 0)
   ]
 };
 // poster question images: last arg on mc() is poster number (0 = show all three)
@@ -635,12 +703,20 @@ function startScreen(){
 
 function cpIntroScreen(cp){
   const meta = CP_META[cp];
+  let extra = "";
+  if(cp==="cp2"){
+    extra = `<div class="checklist" style="margin-top:10px;">${CP2_DEFINITIONS.map(([term,def])=>`<li><strong>${esc(term)}:</strong> ${esc(def)}</li>`).join("")}</div>`;
+  }
+  if(cp==="cp3"){
+    extra = `<a href="https://www.bbc.co.uk/bitesize/articles/zg3496f" target="_blank" rel="noopener" class="btn secondary" style="margin-bottom:14px; text-decoration:none;">Open the BBC Bitesize page \u2197</a>`;
+  }
   return `
   <div class="card">
     <div class="eyebrow">Checkpoint ${cp.slice(-1)} of 3</div>
     <h2>${esc(meta.title)}</h2>
     <p>${esc(meta.note)}</p>
-    <p class="kicker">3 lives. Answer carefully \u2014 if you run out, the checkpoint restarts with fresh questions.</p>
+    ${extra}
+    <p class="kicker">3 lives. Get a question wrong and you'll get another go at the same one \u2014 but run out of lives and the whole checkpoint restarts with fresh questions.</p>
     <button class="btn" id="beginQuiz">Start checkpoint</button>
   </div>`;
 }
@@ -666,11 +742,11 @@ function cpQuizScreen(cp){
 
 function cpRestartedScreen(cp){
   return `
-  <div class="card restarted">
-    <span class="lockicon">\u{1F504}</span>
-    <h2>Out of lives \u2014 let's go again</h2>
-    <p>No mark against you \u2014 the questions are freshly shuffled. Take your time this round.</p>
-    <button class="btn" id="restartContinue">Try the checkpoint again</button>
+  <div class="card deathcard">
+    <span class="skull">\u{1F480}</span>
+    <h2>OUT OF LIVES</h2>
+    <p>No mark against you \u2014 but this checkpoint starts over, questions freshly shuffled.</p>
+    <button class="btn" id="restartContinue">Try again</button>
   </div>`;
 }
 
@@ -691,6 +767,7 @@ function cpLockedScreen(cp){
     <input type="password" id="codeInput" placeholder="Unlock code" inputmode="numeric" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div id="codeErr" class="err" style="display:none;">That code isn't right \u2014 ask your teacher to try again.</div>
     <button class="btn" id="unlockBtn">Unlock next section</button>
+    <div class="teacherOnly"><button type="button" class="forceRedoBtn" data-section="${cp}">Teacher: force a redo of this section instead</button></div>
   </div>`;
 }
 
@@ -731,9 +808,9 @@ function posterIntroScreen(){
     <h2>Spotting techniques in the wild</h2>
     <p>Three real recruitment posters. No lives here \u2014 just look closely and see what you can spot.</p>
     <div class="posterrow">
-      <img src="${POSTER_IMG[1]}" alt="I Want You for U.S. Army poster">
-      <img src="${POSTER_IMG[2]}" alt="Will you fill it? poster">
-      <img src="${POSTER_IMG[3]}" alt="Trained Men, Your Duty poster">
+      <img src="${POSTER_IMG[1]}" alt="Recruitment poster 1">
+      <img src="${POSTER_IMG[2]}" alt="Recruitment poster 2">
+      <img src="${POSTER_IMG[3]}" alt="Recruitment poster 3">
     </div>
     <button class="btn" id="beginPoster">Start analysis</button>
   </div>`;
@@ -773,6 +850,7 @@ function posterLockedScreen(){
     <input type="password" id="codeInput" placeholder="Unlock code" inputmode="numeric" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div id="codeErr" class="err" style="display:none;">That code isn't right \u2014 ask your teacher to try again.</div>
     <button class="btn" id="unlockBtn">Unlock next section</button>
+    <div class="teacherOnly"><button type="button" class="forceRedoBtn" data-section="poster">Teacher: force a redo of this section instead</button></div>
   </div>`;
 }
 
@@ -805,8 +883,6 @@ function designScreen(){
   <div class="card">
     <div class="eyebrow">The Brief</div>
     <h1>Design your poster</h1>
-    <p><strong>Audience:</strong> young men. <strong>Purpose:</strong> to persuade. <strong>Form:</strong> a poster/advert \u2014 a new addition to your Form list. <strong>Register:</strong> advert register plays by different rules to essay-formal \u2014 short punchy lines, direct address and imperatives are all correct choices here, not sloppy ones.</p>
-    <p>Adverts in particular tend to lean on just three devices: <strong>facts/statistics, anecdote,</strong> and <strong>repetition</strong>. Worth making sure at least one of your three is doing real work.</p>
     <h3>Your task</h3>
     <p>Design an original poster or flyer to persuade young men to join the army, using <strong>3 persuasive devices of your choosing</strong>.</p>
     <ul class="checklist">
@@ -817,6 +893,8 @@ function designScreen(){
       <li>A clear call to action</li>
       <li>A short technique log: which 3 devices, and where they appear</li>
     </ul>
+    <h3>Before you design</h3>
+    <p><strong>Audience:</strong> young men. <strong>Purpose:</strong> to persuade. <strong>Form:</strong> a poster/advert \u2014 a new addition to your Form list. <strong>Register:</strong> advert register plays by different rules to essay-formal \u2014 short punchy lines, direct address and imperatives are all correct choices here, not sloppy ones.</p>
     <p class="kicker">Open your Google Slides file now using your QR code, and get designing.</p>
   </div>`;
 }
@@ -885,7 +963,47 @@ document.getElementById("app").addEventListener("click", (e)=>{
     render();
     return;
   }
+
+  if(t.classList.contains("forceRedoBtn")){
+    forceRedo(t.dataset.section);
+    return;
+  }
 });
+
+function forceRedo(section){
+  if(!confirm("Reset this section? This clears points/lives for it and reshuffles the questions.")) return;
+  if(section==="poster"){
+    state.poster.qi = 0;
+    state.poster.done = false;
+    state.poster.order = shuffled(RAW_Q.poster.length);
+    if(state.tabSwitches) state.tabSwitches.poster = 0;
+    state.screen = "poster-quiz";
+  } else {
+    const st = state.cps[section];
+    st.lives = 3; st.pts = 0; st.qi = 0;
+    st.order = shuffled(RAW_Q[section].length);
+    st.restarts++;
+    if(state.tabSwitches) state.tabSwitches[section] = 0;
+    state.screen = section+"-quiz";
+  }
+  render();
+}
+
+function sparkleBurst(container){
+  const glyphs = ["\u2728","\u2b50","\ud83c\udf89"];
+  for(let i=0;i<5;i++){
+    const s = document.createElement("span");
+    s.className = "sparkle";
+    s.textContent = glyphs[i % glyphs.length];
+    const angle = (Math.PI*2/5)*i + Math.random()*0.5;
+    const dist = 46 + Math.random()*22;
+    s.style.setProperty("--sx", Math.round(Math.cos(angle)*dist)+"px");
+    s.style.setProperty("--sy", Math.round(Math.sin(angle)*dist - 20)+"px");
+    s.style.setProperty("--sr", Math.round((Math.random()*140)-70)+"deg");
+    container.appendChild(s);
+    setTimeout(()=>s.remove(), 900);
+  }
+}
 
 function handleAnswer(btn){
   const screen = state.screen;
@@ -902,19 +1020,36 @@ function handleAnswer(btn){
   opts.forEach(o=>o.disabled=true);
   btn.classList.add(correct ? "correct" : "wrong");
   if(!correct){ opts[q.answer].classList.add("correct"); }
+  if(correct){ sparkleBurst(btn); }
+
+  // score bookkeeping happens immediately, before the Continue click
+  let livesNowZero = false;
+  if(!isBonus && !isPoster && cp){
+    const st = state.cps[cp];
+    if(correct){ st.pts += 10; }
+    else {
+      st.lives--;
+      if(st.lives <= 0) livesNowZero = true;
+    }
+    saveState();
+  } else if(isBonus && correct){
+    state.bonus.pts += 15;
+    saveState();
+  }
 
   const fb = document.getElementById("feedbackWrap");
+  let label = "Continue";
+  if(!isBonus && !isPoster && !correct){ label = livesNowZero ? "Continue" : "Try again"; }
   fb.innerHTML = `<div class="feedback ${correct?'good':'bad'}"><strong>${correct? (isBonus?"Nice! Bonus points.":"Correct!") : "Not quite."}</strong> ${esc(q.explain)}</div>
-    <button class="btn" id="nextBtn" style="margin-top:6px;">Continue</button>`;
+    <button class="btn" id="nextBtn" style="margin-top:6px;">${label}</button>`;
 
   document.getElementById("nextBtn").addEventListener("click", ()=>{
-    advance(cp, isBonus, isPoster, correct);
+    proceed(cp, isBonus, isPoster, correct);
   });
 }
 
-function advance(cp, isBonus, isPoster, correct){
+function proceed(cp, isBonus, isPoster, wasCorrect){
   if(isBonus){
-    if(correct) state.bonus.pts += 15;
     state.bonus.qi++;
     if(state.bonus.qi >= RAW_Q.bonus.length){
       state.bonus.done = true;
@@ -941,8 +1076,7 @@ function advance(cp, isBonus, isPoster, correct){
 
   // checkpoint quiz
   const st = state.cps[cp];
-  if(correct){
-    st.pts += 10;
+  if(wasCorrect){
     st.qi++;
     if(st.qi >= RAW_Q[cp].length){
       st.done = true;
@@ -952,24 +1086,17 @@ function advance(cp, isBonus, isPoster, correct){
       state.screen = cp+"-quiz";
     }
   } else {
-    st.lives--;
     if(st.lives <= 0){
       st.restarts++;
       st.lives = 3;
       st.pts = 0;
       st.qi = 0;
       st.order = shuffled(RAW_Q[cp].length);
+      if(state.tabSwitches) state.tabSwitches[cp] = 0;
       state.screen = cp+"-restarted";
     } else {
-      st.qi++;
-      if(st.qi >= RAW_Q[cp].length){
-        // ran out of questions but still has lives and unanswered wrongs earlier - loop back with reshuffle of remaining none; treat as complete pass if reached end with lives>0
-        st.done = true;
-        state.totalPoints += st.pts;
-        state.screen = (cp==="cp3") ? "bonus-prompt" : cp+"-locked";
-      } else {
-        state.screen = cp+"-quiz";
-      }
+      // same question again (qi unchanged) \u2014 they get another go
+      state.screen = cp+"-quiz";
     }
   }
   render();
